@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OMANi-AZIZ Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+  <style>
+    /* تحسينات التمرير */
+    #response::-webkit-scrollbar { width: 8px; }
+    #response::-webkit-scrollbar-track { background: #1e3a8a; }
+    #response::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+  </style>
+</head>
+
+<body class="bg-blue-900 text-white flex flex-col justify-between h-screen">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 bg-blue-800 shadow-md">
+    <i class="fas fa-plus text-2xl"></i>
+    <h1 class="text-xl font-semibold">محادثة جديدة</h1>
+    <i class="fas fa-bars text-2xl"></i>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex flex-col items-center justify-start flex-grow p-4 space-y-4">
+    <img src="https://via.placeholder.com/150" 
+         class="mb-4 rounded-full shadow-lg w-24 h-24 md:w-32 md:h-32"
+         alt="OMANi-AZIZ Logo"/>
+    
+    <!-- منطقة الردود -->
+    <div id="response" class="w-full max-w-2xl h-[50vh] overflow-y-auto space-y-2 p-4 bg-blue-800 rounded-lg shadow-md"></div>
+  </main>
+
+  <!-- Footer (إدخال المستخدم) -->
+  <footer class="p-4 bg-blue-800 shadow-md w-full">
+    <div class="flex items-center border border-blue-500 rounded-full p-2 bg-blue-700">
+      <input 
+        id="messageInput" 
+        aria-label="رسالة الدردشة"
+        class="flex-grow px-4 py-2 bg-blue-700 text-white placeholder-gray-400 focus:outline-none rounded-full" 
+        placeholder="اكتب رسالة إلى OMANi-AZIZ..." 
+        type="text"
+      />
+      <button id="sendButton" aria-label="إرسال الرسالة" class="text-blue-300 hover:text-white ml-2">
+        <i class="fas fa-paper-plane text-2xl"></i>
+      </button>
+    </div>
+    <div class="flex justify-between mt-4">
+      <i class="fas fa-plus-circle text-2xl text-blue-300"></i>
+      <div class="flex space-x-4">
+        <button id="deepThinkButton" class="flex items-center space-x-1 bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700">
+          <span>(R1)</span>
+          <span>تفكير عميق</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    const API_URL = "/api/chat"; // استبدلها بمسار API آمن على السيرفر
+
+    // عناصر DOM
+    const messageInput = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const deepThinkButton = document.getElementById("deepThinkButton");
+    const responseDiv = document.getElementById("response");
+
+    let isProcessing = false; // لمنع التكرار
+
+    // إرسال الرسالة العادية
+    sendButton.addEventListener("click", () => sendMessage(messageInput.value));
+    messageInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") sendMessage(messageInput.value);
+    });
+
+    // التفكير العميق
+    deepThinkButton.addEventListener("click", () => deepThinking(messageInput.value));
+
+    // دالة إرسال الرسالة
+    async function sendMessage(userMessage) {
+        if (!userMessage.trim() || isProcessing) return;
+        isProcessing = true;
+
+        addUserMessage(userMessage);
+        showLoading();
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userMessage }),
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            removeLoading();
+            displayBotResponse(data, false);
+        } catch (error) {
+            removeLoading();
+            showError(`حدث خطأ: ${error.message}`);
+        }
+
+        isProcessing = false;
+        messageInput.value = "";
+    }
+
+    // دالة التفكير العميق
+    async function deepThinking(userMessage) {
+        if (!userMessage.trim() || isProcessing) return;
+        isProcessing = true;
+
+        const deepMessage = `حلل هذا الموضوع بعمق واستنتج النقاط المهمة: "${userMessage}"`;
+        
+        addUserMessage(userMessage, true);
+        showLoading();
+
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: deepMessage }),
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const data = await response.json();
+            removeLoading();
+            displayBotResponse(data, true);
+        } catch (error) {
+            removeLoading();
+            showError(`حدث خطأ: ${error.message}`);
+        }
+
+        isProcessing = false;
+        messageInput.value = "";
+    }
+
+    // دوال مساعدة
+    function addUserMessage(text, isDeep = false) {
+        const div = document.createElement("div");
+        div.className = `text-right ${isDeep ? 'bg-purple-700' : 'bg-blue-600'} p-2 rounded-lg mb-2 shadow-md user-message`;
+        
+        const p = document.createElement("p");
+        p.textContent = `أنت${isDeep ? ' (تفكير عميق)' : ''}: ${text}`;
+
+        div.appendChild(p);
+        responseDiv.appendChild(div);
+    }
+
+    function showLoading() {
+        const p = document.createElement("p");
+        p.id = "loadingIndicator";
+        p.className = "text-gray-400";
+        p.textContent = "جارٍ المعالجة...";
+        responseDiv.appendChild(p);
+    }
+
+    function removeLoading() {
+        const loading = document.getElementById("loadingIndicator");
+        if (loading) loading.remove();
+    }
+
+    function displayBotResponse(data, isDeep) {
+        const div = document.createElement("div");
+        div.className = `text-left ${isDeep ? 'bg-purple-500' : 'bg-gray-600'} p-2 rounded-lg mb-2 shadow-md bot-response`;
+
+        const strong = document.createElement("strong");
+        strong.textContent = `OMANi-AZIZ${isDeep ? ' (تحليل عميق)' : ''}: `;
+
+        const p = document.createElement("p");
+        p.appendChild(strong);
+        p.appendChild(document.createTextNode(data.response));
+
+        div.appendChild(p);
+        responseDiv.appendChild(div);
+    }
+
+    function showError(message) {
+        const p = document.createElement("p");
+        p.className = "text-red-400";
+        p.textContent = message;
+        responseDiv.appendChild(p);
+    }
+  </script>
+
+</body>
+</html>

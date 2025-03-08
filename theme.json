@@ -1,0 +1,33 @@
+{
+  "theme": {
+    "colors": {
+      "primary": "#1E3A8A",
+      "secondary": "#3B82F6",
+      "background": "#1E293B",
+      "text": "#FFFFFF",
+      "accent": "#9333EA"
+    },
+    "font": {
+      "family": "Tajawal, sans-serif",
+      "size": {
+        "small": "14px",
+        "medium": "16px",
+        "large": "20px"
+      }
+    },
+    "layout": {
+      "container-width": "1200px",
+      "border-radius": "8px"
+    }
+  },
+  "animations": {
+    "fade-in": {
+      "duration": "0.3s",
+      "easing": "ease-in-out"
+    },
+    "slide-up": {
+      "duration": "0.4s",
+      "easing": "ease-in-out"
+    }
+  }
+}
