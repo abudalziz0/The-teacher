@@ -1,6 +1,6 @@
 # 📚 The Teacher - منصة تعليمية 🚀
 
-![Project Preview](public/HD-wallpaper-anonymous-dark-hat-male-man-mask-suit.jpg)
+![المعلم](public/HD-wallpaper-anonymous-dark-hat-male-man-mask-suit.jpg)
 
 ## 📌 مقدمة
 **The Teacher** هو مشروع ويب تعليمي يهدف إلى تقديم تجربة تعليمية متكاملة عبر الإنترنت باستخدام **React + TypeScript + Tailwind CSS**.
@@ -19,13 +19,13 @@
 
 ## 📸 **لقطات الشاشة**
 ### 🔹 الصفحة الرئيسية
-![Home Page](public/HD-wallpaper-anonymous-hacker-matrix-green.jpg)
+![الصفحة الرئيسية](public/HD-wallpaper-anonymous-hacker-matrix-green.jpg)
 
 ### 🔹 صفحة المميزات
-![Features Page](public/HD-wallpaper-anonymous-hackers-hacking.jpg)
+![صفحة المميزات](public/HD-wallpaper-anonymous-hackers-hacking.jpg)
 
 ### 🔹 صفحة الاتصال
-![Contact Page](public/HD-wallpaper-anonymous-mask-roses-flowers-dark.jpg)
+![صفحة الاتصال](public/HD-wallpaper-anonymous-mask-roses-flowers-dark.jpg)
 
 ---
 
