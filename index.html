@@ -25,7 +25,7 @@
 
   <!-- Main Content -->
   <main class="flex flex-col items-center justify-start flex-grow p-4 space-y-4">
-    <img src="https://via.placeholder.com/150" 
+    <img src="HD-wallpaper-anonymous-dark-hat-male-man-mask-suit.jpg" 
          class="mb-4 rounded-full shadow-lg w-24 h-24 md:w-32 md:h-32"
          alt="OMANi-AZIZ Logo"/>
     
@@ -47,15 +47,6 @@
         <i class="fas fa-paper-plane text-2xl"></i>
       </button>
     </div>
-    <div class="flex justify-between mt-4">
-      <i class="fas fa-plus-circle text-2xl text-blue-300"></i>
-      <div class="flex space-x-4">
-        <button id="deepThinkButton" class="flex items-center space-x-1 bg-purple-600 text-white px-3 py-1 rounded-lg hover:bg-purple-700">
-          <span>(R1)</span>
-          <span>تفكير عميق</span>
-        </button>
-      </div>
-    </div>
   </footer>
 
   <!-- JavaScript -->
@@ -65,10 +56,7 @@
     // عناصر DOM
     const messageInput = document.getElementById("messageInput");
     const sendButton = document.getElementById("sendButton");
-    const deepThinkButton = document.getElementById("deepThinkButton");
     const responseDiv = document.getElementById("response");
-
-    let isProcessing = false; // لمنع التكرار
 
     // إرسال الرسالة العادية
     sendButton.addEventListener("click", () => sendMessage(messageInput.value));
@@ -76,114 +64,15 @@
         if (event.key === "Enter") sendMessage(messageInput.value);
     });
 
-    // التفكير العميق
-    deepThinkButton.addEventListener("click", () => deepThinking(messageInput.value));
-
-    // دالة إرسال الرسالة
     async function sendMessage(userMessage) {
-        if (!userMessage.trim() || isProcessing) return;
-        isProcessing = true;
+        if (!userMessage.trim()) return;
 
-        addUserMessage(userMessage);
-        showLoading();
-
-        try {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userMessage }),
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-            const data = await response.json();
-            removeLoading();
-            displayBotResponse(data, false);
-        } catch (error) {
-            removeLoading();
-            showError(`حدث خطأ: ${error.message}`);
-        }
-
-        isProcessing = false;
-        messageInput.value = "";
-    }
-
-    // دالة التفكير العميق
-    async function deepThinking(userMessage) {
-        if (!userMessage.trim() || isProcessing) return;
-        isProcessing = true;
-
-        const deepMessage = `حلل هذا الموضوع بعمق واستنتج النقاط المهمة: "${userMessage}"`;
-        
-        addUserMessage(userMessage, true);
-        showLoading();
-
-        try {
-            const response = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: deepMessage }),
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-            const data = await response.json();
-            removeLoading();
-            displayBotResponse(data, true);
-        } catch (error) {
-            removeLoading();
-            showError(`حدث خطأ: ${error.message}`);
-        }
-
-        isProcessing = false;
-        messageInput.value = "";
-    }
-
-    // دوال مساعدة
-    function addUserMessage(text, isDeep = false) {
         const div = document.createElement("div");
-        div.className = `text-right ${isDeep ? 'bg-purple-700' : 'bg-blue-600'} p-2 rounded-lg mb-2 shadow-md user-message`;
-        
-        const p = document.createElement("p");
-        p.textContent = `أنت${isDeep ? ' (تفكير عميق)' : ''}: ${text}`;
-
-        div.appendChild(p);
+        div.className = "text-right bg-blue-600 p-2 rounded-lg mb-2 shadow-md";
+        div.textContent = `أنت: ${userMessage}`;
         responseDiv.appendChild(div);
-    }
 
-    function showLoading() {
-        const p = document.createElement("p");
-        p.id = "loadingIndicator";
-        p.className = "text-gray-400";
-        p.textContent = "جارٍ المعالجة...";
-        responseDiv.appendChild(p);
-    }
-
-    function removeLoading() {
-        const loading = document.getElementById("loadingIndicator");
-        if (loading) loading.remove();
-    }
-
-    function displayBotResponse(data, isDeep) {
-        const div = document.createElement("div");
-        div.className = `text-left ${isDeep ? 'bg-purple-500' : 'bg-gray-600'} p-2 rounded-lg mb-2 shadow-md bot-response`;
-
-        const strong = document.createElement("strong");
-        strong.textContent = `OMANi-AZIZ${isDeep ? ' (تحليل عميق)' : ''}: `;
-
-        const p = document.createElement("p");
-        p.appendChild(strong);
-        p.appendChild(document.createTextNode(data.response));
-
-        div.appendChild(p);
-        responseDiv.appendChild(div);
-    }
-
-    function showError(message) {
-        const p = document.createElement("p");
-        p.className = "text-red-400";
-        p.textContent = message;
-        responseDiv.appendChild(p);
+        messageInput.value = "";
     }
   </script>
 
