@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberNeon - لوحة التحكم المستقبلية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-pink: #ff00ff;
+            --cyber-black: #0a0a12;
+            --cyber-gray: #1a1a24;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--cyber-black);
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        .neon-glow {
+            position: relative;
+            &::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: radial-gradient(circle, 
+                    rgba(188,19,254,0.3) 0%, 
+                    rgba(0,243,255,0.1) 50%, 
+                    transparent 100%);
+                pointer-events: none;
+            }
+        }
+
+        .neon-text {
+            text-shadow: 0 0 10px var(--neon-blue),
+                        0 0 20px var(--neon-purple),
+                        0 0 30px var(--neon-pink);
+            animation: text-glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes text-glow {
+            from { text-shadow: 0 0 5px var(--neon-blue); }
+            to { text-shadow: 0 0 20px var(--neon-purple); }
+        }
+
+        .cyber-nav {
+            background: rgba(10,10,18,0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--neon-purple);
+        }
+
+        .nav-item {
+            position: relative;
+            transition: 0.3s all;
+            &::before {
+                content: '';
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: var(--neon-pink);
+                transition: 0.3s width;
+            }
+            &:hover::before {
+                width: 100%;
+            }
+        }
+
+        .cyber-card {
+            background: var(--cyber-gray);
+            border: 1px solid var(--neon-purple);
+            box-shadow: 0 0 15px rgba(188,19,254,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            &:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 0 25px rgba(188,19,254,0.4);
+            }
+        }
+
+        .glow-input {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            transition: 0.3s all;
+            &:focus {
+                box-shadow: 0 0 15px var(--neon-blue);
+            }
+        }
+
+        .cyber-btn {
+            background: var(--neon-purple);
+            position: relative;
+            overflow: hidden;
+            &::after {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(45deg, 
+                    transparent, 
+                    rgba(255,255,255,0.2), 
+                    transparent);
+                transform: rotate(45deg);
+                animation: scan 3s infinite;
+            }
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        @media (max-width: 768px) {
+            .cyber-nav {
+                flex-direction: column;
+            }
+            .threejs-canvas {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <!-- التنقل -->
+    <nav class="cyber-nav p-4 flex justify-between items-center">
+        <div class="text-2xl font-bold neon-text">CyberNeon</div>
+        <div class="flex space-x-6">
+            <a href="#home" class="nav-item neon-text">الرئيسية</a>
+            <a href="#dashboard" class="nav-item neon-text">لوحة التحكم</a>
+            <a href="#users" class="nav-item neon-text">المستخدمون</a>
+            <a href="#settings" class="nav-item neon-text">الإعدادات</a>
+            <a href="#contact" class="nav-item neon-text">التواصل</a>
+        </div>
+        <button id="theme-toggle" class="cyber-btn px-4 py-2 rounded-lg">تبديل الوضع</button>
+    </nav>
+
+    <!-- الصفحة الرئيسية -->
+    <section id="home" class="min-h-screen p-8 neon-glow">
+        <canvas id="cyber-logo" class="w-full h-96"></canvas>
+        <h1 class="text-5xl text-center my-8 neon-text">مرحبا بكم في المستقبل</h1>
+    </section>
+
+    <!-- لوحة التحكم -->
+    <section id="dashboard" class="p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="cyber-card p-6">
+                <h3 class="text-xl neon-text mb-4">المستخدمون النشطون</h3>
+                <canvas id="user-chart"></canvas>
+            </div>
+            <div class="cyber-card p-6">
+                <h3 class="text-xl neon-text mb-4">إحصائيات النظام</h3>
+                <div id="system-stats" class="space-y-4"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- إدارة المستخدمين -->
+    <section id="users" class="p-8 bg-cyber-gray">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between mb-6">
+                <h2 class="text-3xl neon-text">إدارة المستخدمين</h2>
+                <button class="cyber-btn px-4 py-2" onclick="showUserForm()">إضافة مستخدم</button>
+            </div>
+            <div id="user-table" class="cyber-card p-4"></div>
+        </div>
+    </section>
+
+    <!-- نموذج إضافة مستخدم -->
+    <div id="user-form" class="fixed inset-0 bg-black bg-opacity-50 hidden">
+        <div class="cyber-card p-6 max-w-md mx-auto mt-20">
+            <form class="space-y-4">
+                <input type="text" class="glow-input w-full p-2" placeholder="اسم المستخدم">
+                <input type="email" class="glow-input w-full p-2" placeholder="البريد الإلكتروني">
+                <select class="glow-input w-full p-2">
+                    <option>صلاحيات المستخدم</option>
+                </select>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="cyber-btn px-4 py-2">حفظ</button>
+                    <button type="button" class="cyber-btn px-4 py-2" onclick="hideUserForm()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- الإعدادات -->
+    <section id="settings" class="p-8">
+        <div class="max-w-2xl mx-auto cyber-card p-6">
+            <h2 class="text-3xl neon-text mb-6">الإعدادات</h2>
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="neon-text block mb-2">لون الواجهة</label>
+                    <input type="color" class="w-full h-10">
+                </div>
+                <div>
+                    <label class="neon-text block mb-2">نمط التصميم</label>
+                    <select class="glow-input w-full p-2">
+                        <option>Cyberpunk</option>
+                        <option>Neon</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- التواصل -->
+    <section id="contact" class="p-8 bg-cyber-gray">
+        <div class="max-w-2xl mx-auto cyber-card p-6">
+            <h2 class="text-3xl neon-text mb-6">تواصل معنا</h2>
+            <form class="space-y-4">
+                <input type="text" class="glow-input w-full p-2" placeholder="الاسم">
+                <input type="email" class="glow-input w-full p-2" placeholder="البريد الإلكتروني">
+                <textarea class="glow-input w-full p-2" rows="4" placeholder="الرسالة"></textarea>
+                <button class="cyber-btn w-full py-2">إرسال</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        // نظام الثيمات
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // نظام الرسوم البيانية
+        const userChart = new Chart(document.getElementById('user-chart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['نشطون', 'غير نشطين'],
+                datasets: [{
+                    data: [65, 35],
+                    backgroundColor: [var(--neon-blue), var(--neon-purple)]
+                }]
+            }
+        });
+
+        // نظام إدارة المستخدمين
+        let users = [];
+        
+        function showUserForm() {
+            document.getElementById('user-form').style.display = 'flex';
+        }
+
+        function hideUserForm() {
+            document.getElementById('user-form').style.display = 'none';
+        }
+
+        // Three.js للشعار
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cyber-logo') });
+        
+        // إعداد النموذج ثلاثي الأبعاد
+        const geometry = new THREE.TorusGeometry(3, 1, 16, 100);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x00ffff,
+            emissive: 0xff00ff,
+            specular: 0xffffff
+        });
+        
+        const logo = new THREE.Mesh(geometry, material);
+        scene.add(logo);
+        camera.position.z = 5;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            logo.rotation.x += 0.01;
+            logo.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // GSAP للتحريك
+        gsap.from(".cyber-card", {
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            stagger: 0.1
+        });
+
+        // التحكم الصوتي
+        if ('webkitSpeechRecognition' in window) {
+            const recognition = new webkitSpeechRecognition();
+            recognition.onresult = (event) => {
+                const command = event.results[0][0].transcript;
+                handleVoiceCommand(command);
+            };
+            recognition.start();
+        }
+
+        function handleVoiceCommand(command) {
+            if (command.includes('افتح')) {
+                const page = command.split('افتح')[1].trim();
+                document.querySelector(`[href="#${page}"]`).click();
+            }
+        }
+
+        // تحسينات الجوال
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+  </html>
